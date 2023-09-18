@@ -8,17 +8,21 @@ prepare dataloader
 """
 import time
 import datetime
-from tqdm import tqdm, trange
 import numpy as np
 import pandas as pd
+import os
 import matplotlib.pyplot as plt
 from collections import Counter
 from itertools import chain
+from tqdm import tqdm, trange
+
 
 FIELD = [
     "Dataset",	"DiseaseType", "SpecimenID", "Enzyme", "Position", "ID",
     "Number", "X", "Y", "FITC", "mCherry", "Date"
     ]
+
+SEP = os.sep
 
 class Preprocess:
     """
@@ -194,7 +198,7 @@ class DataMaker:
         self.data = data
 
 
-    def data2histo(self, fileout:str="", ratio:float=0.9, bins=(30, 25)):
+    def main(self, outdir:str="", ratio:float=0.9, bins=(30, 25)):
         """
         dataをまとめてhistogram arrayへと変換, npzで保存する
         input array, output arrayの順
@@ -210,7 +214,7 @@ class DataMaker:
             AE的に組むため, 前者が大きいことが前提
 
         """
-        assert len(fileout) > 0
+        assert len(outdir) > 0
         assert (ratio > 0) & (ratio < 1) 
         assert bins[0] >= bins[1]
         # dataの準備
@@ -224,6 +228,8 @@ class DataMaker:
             array0[i, :, :] = self.binarize(img0)
             array1[i, :, :] = self.binarize(img1)
         # npzで保存
+        now = datetime.datetime.now().strftime('%Y%m%d')
+        fileout = outdir + SEP + f"dataset_{now}.npz"
         np.savez_compressed(fileout, array0, array1)
 
 
@@ -232,7 +238,6 @@ class DataMaker:
         データをヒストグラムへと変換し, そのarrayを得る
         
         """
-        assert bins[0] >= bins[1]
         # prepare histogram
         fig = plt.figure(figsize=self._figsize, dpi=self._dpi)
         ax = fig.add_subplot(1, 1, 1)
