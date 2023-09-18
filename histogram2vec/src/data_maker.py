@@ -20,6 +20,82 @@ FIELD = [
     "Number", "X", "Y", "FITC", "mCherry", "Date"
     ]
 
+class Preprocess:
+    """
+    preprocessor, 基本的にハード
+    
+    ID: 2nd_H_0404_6PGDH2_1
+        2ndデータセット
+            1st, 2nd, astと三つある. astってなんだろうか
+        健常人ラベル
+            healty OR cancerで問題ない
+        血液検体IDが0404
+            検体IDで問題ない
+        6PGDH2
+            これかLDHの二つなので見ている酵素だろう
+        1
+            1-12までしかないので視野番号だろう
+            Positionと他では表記されていた
+    Number
+        各視野内での輝点番号
+    X, Y
+        各視野内でのX, Y座標
+    FITC
+        プローブ蛍光由来の強度
+    mCherry
+        reference色素の強度
+    Date
+        測定日付
+    
+    """
+    def __init__(self, url, v_name:str="FITC"):
+        df = pd.read_csv(url)
+        ids = df["ID"].values.flatten().tolist()
+        split = []
+        n_item = 0
+        for i in ids:
+            tmp = i.split("_")
+            if n_item==0:
+                n_item = len(tmp)
+            else:
+                if n_item!=len(tmp):
+                    print(i)
+                    raise ValueError
+            split.append(tmp)
+        df_id = pd.DataFrame(split)
+        self.id_col = ["Dataset", "DiseaseType", "SpecimenID", "Enzyme", "Position"]
+        df_id.columns = self.id_col
+        comb = pd.concat([df_id, df], axis=1, join="inner")
+        print(df_id.shape, df.shape)
+        self.data = comb
+        self._fix(v_name)
+
+
+    def _fix(self, v_name:str="FITC"):
+        """ mainの値であるFITCに変なstrが混じっていたので対処 """
+        before = self.data.shape
+        def convert(x):
+            try:
+                return float(x)
+            except ValueError:
+                return np.nan
+        self.data.loc[:, v_name] = self.data.loc[:, v_name].map(convert)
+        self.data = self.data.dropna(subset=[v_name])
+        print(before, self.data.shape)
+
+
+    def check_content(self):
+        """ 中身を確認する """
+        count = []
+        for c in self.id_col:
+            print("====================================", c)
+            tmp = self.data[c].values.flatten().tolist()
+            cntr = Counter(tmp)
+            count.append(cntr)
+            for k, v in cntr.items():
+                print(k, v)
+
+
 class Data:
     """
     data格納モジュール, 基本的にハード
@@ -83,7 +159,9 @@ class Data:
         res = []
         for s in specimens:
             tmp = self.sample(s, n_sample, ratio, v_name, s_name)
-            res.append(np.split(tmp, n_sample, axis=0))
+            tmp = [v[0] for v in np.split(tmp, n_sample, axis=0)]
+            ## 1個中に入るため
+            res.append(tmp)
         res = list(chain.from_iterable(res))
         if shuffle:
             rng = np.random.default_rng()
