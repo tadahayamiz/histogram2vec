@@ -240,7 +240,9 @@ class DataMaker:
             array1[i, :, :] = self.binarize(img1)
         # npzで保存
         if test_view:
+            print("input example")
             self.imshow(array0[0])
+            print("output example")
             self.imshow(array1[0])
         now = datetime.datetime.now().strftime('%Y%m%d')
         fileout = outdir + SEP + f"dataset_{now}.npz"
