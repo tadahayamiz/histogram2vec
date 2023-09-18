@@ -68,14 +68,13 @@ class Preprocess:
         self.id_col = ["Dataset", "DiseaseType", "SpecimenID", "Enzyme", "Position"]
         df_id.columns = self.id_col
         comb = pd.concat([df_id, df], axis=1, join="inner")
-        print(df_id.shape, df.shape)
         self.data = comb
         # preprocessing
         self._fix(v_name)
         # export
         if len(fileout) == 0:
             ext = url.split(".")[-1]
-            fileout = url.replace(ext, f"_modified.{ext}")
+            fileout = url.replace(f".{ext}", f"_modified.{ext}")
         self.data.to_csv(fileout, sep=sep)
 
 
@@ -89,7 +88,7 @@ class Preprocess:
                 return np.nan
         self.data.loc[:, v_name] = self.data.loc[:, v_name].map(convert)
         self.data = self.data.dropna(subset=[v_name])
-        print(before, self.data.shape)
+        # print(before, self.data.shape)
 
 
     def check_content(self):
