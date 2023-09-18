@@ -48,8 +48,10 @@ class Preprocess:
         測定日付
     
     """
-    def __init__(self, url, v_name:str="FITC"):
-        df = pd.read_csv(url)
+    def __init__(
+            self, url, fileout:str="", sep:str=",", v_name:str="FITC"
+            ):
+        df = pd.read_csv(url, sep=sep)
         ids = df["ID"].values.flatten().tolist()
         split = []
         n_item = 0
@@ -68,7 +70,13 @@ class Preprocess:
         comb = pd.concat([df_id, df], axis=1, join="inner")
         print(df_id.shape, df.shape)
         self.data = comb
+        # preprocessing
         self._fix(v_name)
+        # export
+        if len(fileout) == 0:
+            ext = url.split(".")[-1]
+            fileout = url.replace(ext, f"_modified.{ext}")
+        self.data.to_csv(fileout, sep=sep)
 
 
     def _fix(self, v_name:str="FITC"):
