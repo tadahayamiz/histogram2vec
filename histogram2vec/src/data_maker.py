@@ -193,7 +193,7 @@ class DataMaker:
         self.limit = None
 
 
-    def set_data(self, data, limit:tuple=(), test_bins=30):
+    def set_data(self, data, test_bins=30, limit:tuple=()):
         """ setter """
         self.data = data
         if len(limit) == 0:
@@ -263,9 +263,11 @@ class DataMaker:
             labeltop=False, labelright=False, labelbottom=False, labelleft=False,
             top=False, right=False, bottom=False, left=False
             )
-        ax.hist(
-            data, color="black", density=True, bins=bins, range=self.limit
-            )
+        # ax.hist(
+        #     data, color="black", density=True, bins=bins, range=self.limit
+        #     )
+        # rangeを考慮しない方針
+        ax.hist(data, color="black", bins=bins)
         # convert array
         fig.canvas.draw() # レンダリング
         data = fig.canvas.tostring_rgb() # rgbのstringとなっている
@@ -299,11 +301,15 @@ class DataMaker:
         num = 4
         idx = list(range(len(data)))
         np.random.shuffle(idx)
-        fig, axes = plt.subplots(1, num, figsize=(3 * num, 3))
-        plt.title("test")
+        fig, axes = plt.subplots(1, num, figsize=(2.5 * num, 2.5))
         for i in range(num):
+            # axes[i].hist(
+            #     data[idx[i]], color="black", density=True,
+            #     bins=test_bins, range=limit
+            #     )
+            # rangeを考慮しない方針 230918
             axes[i].hist(
-                data[idx[i]], color="black", density=True,
-                bins=test_bins, range=limit
+                data[idx[i]], color="black", bins=test_bins
                 )
+
         plt.show()
