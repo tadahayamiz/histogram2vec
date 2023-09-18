@@ -196,18 +196,13 @@ class DataMaker:
     def set_data(self, data, limit:tuple=(), test_bins=30):
         """ setter """
         self.data = data
-        vmin = [np.min(v) for v in data]
-        vmax = [np.max(v) for v in data]
-        imin = np.argmin(vmin)
-        imax = np.argmax(vmax)
-        dmin = data[imin]
-        dmax = data[imax]
         if len(limit) == 0:
-            limit = (vmin[imin], vmax[imax])
+            vmin = [np.min(v) for v in data]
+            vmax = [np.max(v) for v in data]
+            limit = (np.min(vmin), np.max(vmax))
         self.limit = limit
         # plot
-        self._test_view(dmin, "min", test_bins, limit)
-        self._test_view(dmin, "max", test_bins, limit)
+        self._test_view(data, test_bins, limit)
 
 
     def main(
@@ -268,7 +263,9 @@ class DataMaker:
             labeltop=False, labelright=False, labelbottom=False, labelleft=False,
             top=False, right=False, bottom=False, left=False
             )
-        ax.hist(data, color="black", bins=bins, range=self.limit)
+        ax.hist(
+            data, color="black", density=True, bins=bins, range=self.limit
+            )
         # convert array
         fig.canvas.draw() # レンダリング
         data = fig.canvas.tostring_rgb() # rgbのstringとなっている
@@ -297,10 +294,16 @@ class DataMaker:
         plt.show()
 
     
-    def _test_view(self, data, title, test_bins, limit):
+    def _test_view(self, data, test_bins, limit):
         """ refer to set_data """
-        fig = plt.figure(figsize=(4, 4))
-        ax = fig.add_subplot(1, 1, 1)
-        ax.set_title(title)
-        ax.hist(data, color="black", bins=test_bins, range=limit)
+        num = 4
+        idx = list(range(len(data)))
+        np.random.shuffle(idx)
+        fig, axes = plt.subplots(1, num, figsize=(3 * num, 3))
+        plt.title("test")
+        for i in range(num):
+            axes[i].hist(
+                data[idx[i]], color="black", density=True,
+                bins=test_bins, range=limit
+                )
         plt.show()
