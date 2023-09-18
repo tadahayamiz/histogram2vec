@@ -16,7 +16,6 @@ from collections import Counter
 from itertools import chain
 from tqdm.auto import tqdm, trange
 
-
 FIELD = [
     "Dataset",	"DiseaseType", "SpecimenID", "Enzyme", "Position", "ID",
     "Number", "X", "Y", "FITC", "mCherry", "Date"
@@ -191,18 +190,35 @@ class DataMaker:
         self._dpi = 100
         self._figsize = pixel[0] / self._dpi, pixel[1] / self._dpi
         self.data = None
+        self.limit = None
 
 
-    def set_data(self, data):
+    def set_data(self, data, limit:tuple=(), test_bins=30):
         """ setter """
         self.data = data
+        vmin = [np.min(v) for v in data]
+        vmax = [np.max(v) for v in data]
+        imin = np.argmin(vmin)
+        imax = np.argmax(vmax)
+        dmin = data[imin]
+        dmax = data[imax]
+        if len(limit) == 0:
+            limit = (vmin[imin], vmax[imax])
+        self.limit = limit
+        # plot
+        self._test_view(dmin, "min", test_bins, limit)
+        self._test_view(dmin, "max", test_bins, limit)
 
 
-    def main(self, outdir:str="", ratio:float=0.9, bins=(30, 25)):
+    def main(
+            self, outdir:str="", limit:tuple=(), ratio:float=0.9,
+            bins=(30, 25), test_view:bool=True
+            ):
         """
         dataをまとめてhistogram arrayへと変換, npzで保存する
         input array, output arrayの順
         各arrayはsample, h, wの順
+        time consuming, 1000回すのに5 min程度かかる
         
         Parameters
         ----------
@@ -228,9 +244,12 @@ class DataMaker:
             array0[i, :, :] = self.binarize(img0)
             array1[i, :, :] = self.binarize(img1)
         # npzで保存
+        if test_view:
+            self.imshow(array0[0])
+            self.imshow(array1[0])
         now = datetime.datetime.now().strftime('%Y%m%d')
         fileout = outdir + SEP + f"dataset_{now}.npz"
-        np.savez_compressed(fileout, array0, array1)
+        np.savez_compressed(fileout, input=array0, output=array1)
 
 
     def get_hist_array(self, data, bins=30):
@@ -249,7 +268,7 @@ class DataMaker:
             labeltop=False, labelright=False, labelbottom=False, labelleft=False,
             top=False, right=False, bottom=False, left=False
             )
-        ax.hist(data, color="black", bins=bins)
+        ax.hist(data, color="black", bins=bins, range=self.limit)
         # convert array
         fig.canvas.draw() # レンダリング
         data = fig.canvas.tostring_rgb() # rgbのstringとなっている
@@ -265,3 +284,23 @@ class DataMaker:
         data = (data == 0).sum(axis=2) # h, w, cであり, blackなので255, 0のみとなっている
         data = (data > 0).astype(np.uint8)
         return data
+    
+
+    def imshow(self, data, cmap='binary', figsize=None):
+        """ show pixelized data """
+        plt.figure(figsize=figsize)
+        plt.tick_params(
+            labeltop=False, labelright=False, labelbottom=False, labelleft=False,
+            top=False, right=False, bottom=False, left=False
+            )
+        plt.imshow(data, aspect='equal', cmap=cmap)
+        plt.show()
+
+    
+    def _test_view(self, data, title, test_bins, limit):
+        """ refer to set_data """
+        fig = plt.figure(figsize=(4, 4))
+        ax = fig.add_subplot(1, 1, 1)
+        ax.set_title(title)
+        ax.hist(data, color="black", bins=test_bins, range=limit)
+        plt.show()
