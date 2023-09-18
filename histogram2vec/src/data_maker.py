@@ -162,9 +162,10 @@ class Data:
             ):
         """ 指定したsamplesizeまでサンプリングを行う """
         specimens = set(list(self.data[s_name]))
+        print(f"> handling {len(specimens)} specimens")
         n_sample = samplesize // len(specimens) # n_sampleを決める
         res = []
-        for s in specimens:
+        for s in tqdm(specimens):
             tmp = self.sample(s, n_sample, ratio, v_name, s_name)
             tmp = [v[0] for v in np.split(tmp, n_sample, axis=0)]
             ## 1個中に入るため
@@ -215,7 +216,7 @@ class DataMaker:
         # dataの準備
         array0 = np.zeros((len(self.data), self.pixel[0], self.pixel[1]))
         array1 = np.zeros((len(self.data), self.pixel[0], self.pixel[1]))
-        for d in trange(len(self.data)):
+        for i, d in tqdm(enumerate(self.data)):
             # dataのhistogram化
             img0 = self.get_hist_array(d, bins=bins[0])
             img1 = self.get_hist_array(d, bins=bins[1])
