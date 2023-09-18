@@ -14,7 +14,7 @@ import os
 import matplotlib.pyplot as plt
 from collections import Counter
 from itertools import chain
-from tqdm import tqdm, trange
+from tqdm.auto import tqdm, trange
 
 
 FIELD = [
