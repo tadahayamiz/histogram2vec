@@ -209,8 +209,8 @@ class DataMaker:
 
 
     def main(
-            self, outdir:str="", limit:tuple=(), ratio:float=0.9,
-            bins:tuple=(), test_view:bool=True
+            self, outdir:str="", ratio:float=0.9,
+            bins:tuple=(), test_view:bool=True, limit:tuple=()
             ):
         """
         dataをまとめてhistogram arrayへと変換, npzで保存する
@@ -230,12 +230,12 @@ class DataMaker:
         """
         assert len(outdir) > 0
         assert (ratio > 0) & (ratio < 1) 
-        assert bins[0] >= bins[1]
         # dataの準備
         array0 = np.zeros((len(self.data), self.pixel[0], self.pixel[1]))
         array1 = np.zeros((len(self.data), self.pixel[0], self.pixel[1]))
         if len(bins) == 0:
             bins = self.bins
+        assert bins[0] >= bins[1]
         for i, d in tqdm(enumerate(self.data)):
             # dataのhistogram化
             img0 = self.get_hist_array(d, bins=bins[0])
