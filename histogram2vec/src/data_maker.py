@@ -185,15 +185,16 @@ class DataMaker:
     dataを読み込んでヒストグラムを表すnp配列へと変換する
     
     """
-    def __init__(self, pixel:tuple=(256, 256)):
+    def __init__(self, pixel:tuple=(64, 64), bins:tuple=(64, 32)):
         self.pixel = pixel
         self._dpi = 100
         self._figsize = pixel[0] / self._dpi, pixel[1] / self._dpi
+        self.bins = bins
         self.data = None
         self.limit = None
 
 
-    def set_data(self, data, test_bins=30, limit:tuple=()):
+    def set_data(self, data, test_bins=None, limit:tuple=()):
         """ setter """
         self.data = data
         if len(limit) == 0:
@@ -202,12 +203,14 @@ class DataMaker:
             limit = (np.min(vmin), np.max(vmax))
         self.limit = limit
         # plot
+        if test_bins is None:
+            test_bins = self.bins[0]
         self._test_view(data, test_bins, limit)
 
 
     def main(
             self, outdir:str="", limit:tuple=(), ratio:float=0.9,
-            bins=(30, 25), test_view:bool=True
+            bins:tuple=(), test_view:bool=True
             ):
         """
         dataをまとめてhistogram arrayへと変換, npzで保存する
@@ -231,6 +234,8 @@ class DataMaker:
         # dataの準備
         array0 = np.zeros((len(self.data), self.pixel[0], self.pixel[1]))
         array1 = np.zeros((len(self.data), self.pixel[0], self.pixel[1]))
+        if len(bins) == 0:
+            bins = self.bins
         for i, d in tqdm(enumerate(self.data)):
             # dataのhistogram化
             img0 = self.get_hist_array(d, bins=bins[0])
