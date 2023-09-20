@@ -107,6 +107,15 @@ def summarize_model(model, input, outdir):
     torch.save(model.state_dict(), outdir + SEP + 'model.pt')
 
 
+def save_loss(train_loss, valid_loss, outdir, name:str=""):
+    """ save loss """
+    df = pd.DataFrame({"train_loss":train_loss, "valid_loss":valid_loss})
+    if len(name) > 0:
+        df.to_csv(outdir + SEP + f'loss_curve_{name}.txt', sep='\t')
+    else:
+        df.to_csv(outdir + SEP + f'loss_curve.txt', sep='\t')
+
+
 # plot
 def plot_progress(
         train_loss, test_loss, num_epoch, outdir, xlabel="epoch", ylabel="loss"

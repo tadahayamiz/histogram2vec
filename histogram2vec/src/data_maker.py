@@ -169,19 +169,22 @@ class Data:
         print(f"> handling {len(specimens)} specimens")
         n_sample = samplesize // len(specimens) # n_sampleを決める
         res = []
-        label = []
+        specimen = []
         for s in tqdm(specimens):
             tmp = self.sample(s, n_sample, ratio, v_name, s_name)
             tmp = [v[0] for v in np.split(tmp, n_sample, axis=0)]
             ## 1個中に入るため
             res.append(tmp)
-            label.append([s] * n_sample)
+            specimen.append([s] * n_sample)
         res = list(chain.from_iterable(res))
-        label = list(chain.from_iterable(label))
+        specimen = list(chain.from_iterable(specimen))
         if shuffle:
             rng = np.random.default_rng()
-            rng.shuffle(res)
-        return res
+            idx = list(range(len(res)))
+            rng.shuffle(idx)
+            res = [res[i] for i in idx]
+            specimen = [specimen[i] for i in idx]
+        return res, specimen
 
 
 class DataMaker:
@@ -195,6 +198,7 @@ class DataMaker:
         self._figsize = pixel[0] / self._dpi, pixel[1] / self._dpi
         self.bins = bins
         self.data = None
+        self.specimen = None
         self.limit = None
 
 
@@ -210,6 +214,11 @@ class DataMaker:
         if test_bins is None:
             test_bins = self.bins[0]
         self._test_view(data, test_bins, limit)
+
+    
+    def set_specimen(self, specimen):
+        """ specimen ID """
+        self.specimen = specimen
 
 
     def main(
@@ -258,7 +267,9 @@ class DataMaker:
             self.imshow(array1[0, :, :, 0])
         now = datetime.datetime.now().strftime('%Y%m%d')
         fileout = outdir + SEP + f"dataset_{now}.npz"
-        np.savez_compressed(fileout, input=array0, output=array1)
+        np.savez_compressed(
+            fileout, input=array0, output=array1, specimen=self.specimen
+            )
 
 
     def get_hist_array(self, data, bins=30):

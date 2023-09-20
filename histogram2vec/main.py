@@ -204,6 +204,9 @@ class Hist2vec:
             train_loss[2], test_loss[2], self.num_epoch, self.dir_name, xlabel="epoch", ylabel="KLD"
             )
         utils.summarize_model(model, next(iter(train_loader))[0], self.dir_name)
+        utils.save_loss(train_loss[0], test_loss[0], self.dir_name, "total")
+        utils.save_loss(train_loss[1], test_loss[1], self.dir_name, "RL")
+        utils.save_loss(train_loss[2], test_loss[2], self.dir_name, "KLD")
         # 4. save results & config
         utils.to_logger(self.logger, name='loss', obj=criterion)
         utils.to_logger(
