@@ -68,9 +68,13 @@ class Encoder(nn.Module):
 
 
     def forward(self, x):
+        print("enc x", x.shape)
         h = self.b1(x)
+        print("h1", h.shape)
         h = self.b2(h)
+        print("h2", h.shape)
         h = self.b3(h)
+        print("h3", h.shape)
         return self.b4(h)
 
 
@@ -84,9 +88,13 @@ class Decoder(nn.Module):
 
 
     def forward(self, x):
+        print("dec x", x.shape)
         h = self.b1(x)
+        print("h1", h.shape)
         h = self.b2(h)
+        print("h2", h.shape)
         h = self.b3(h)
+        print("h3", h.shape)
         return self.b4(h)
 
 
@@ -118,7 +126,10 @@ class VAE(nn.Module):
 
     def encode(self, x):
         h = self.encoder(x)
+        print("enc output", h.shape)
         h = h.view(-1, self.n_middle_neurons)
+        print("middle_neuron", self.n_middle_neurons)
+        print("squeeze", h.shape)
         mu = self.fc_mu(h)
         logvar = self.fc_logvar(h)
         return mu, logvar
