@@ -6,6 +6,7 @@ utilities
 
 @author: tadahaya
 """
+import os
 import datetime
 import numpy as np
 import pandas as pd
@@ -16,6 +17,8 @@ import matplotlib.pyplot as plt
 from sklearn import metrics
 
 from torchinfo import summary
+
+SEP = os.sep
 
 # assist model building
 def fix_seed(seed:int=None,fix_gpu:bool=False):
@@ -49,7 +52,7 @@ def init_logger(
         tag = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
     logging.basicConfig(
         level=level_dic[level_file],
-        filename=f'{outdir}/log_{tag}.txt',
+        filename=f'{outdir}{SEP}log_{tag}.txt',
         format='[%(asctime)s] [%(levelname)s] %(message)s',
         datefmt='%Y%m%d-%H%M%S',
         )
@@ -97,11 +100,11 @@ def summarize_model(model, input, outdir):
     
     """
     try:
-        with open(outdir + '/summary.txt', 'w') as writer:
+        with open(outdir + SEP + 'summary.txt', 'w') as writer:
             writer.write(repr(summary(model, input.size())))
     except ModuleNotFoundError:
         print('!! CAUTION: no torchinfo and model summary was not saved !!')
-    torch.save(model.state_dict(), outdir + '/model.pt')
+    torch.save(model.state_dict(), outdir + SEP + 'model.pt')
 
 
 # plot
@@ -117,7 +120,7 @@ def plot_progress(train_loss, test_loss, num_epoch, outdir):
     ax.grid()
     ax.legend()
     plt.tight_layout()
-    plt.savefig(outdir + '/progress.tif', dpi=100, bbox_inches='tight')
+    plt.savefig(outdir + SEP + 'progress.tif', dpi=100, bbox_inches='tight')
 
 
 def plot_accuracy(scores, labels, outdir):
@@ -137,7 +140,7 @@ def plot_accuracy(scores, labels, outdir):
     axes[0, 2].set_xlabel('Recall')
     axes[0, 2].set_ylabel('Precision')
     plt.grid()
-    plt.savefig(outdir + '/accuracy.tif', dpi=100, bbox_inches='tight')
+    plt.savefig(outdir + SEP + 'accuracy.tif', dpi=100, bbox_inches='tight')
     df = pd.DataFrame({'labels':labels, 'predicts':scores})
-    df.to_csv(outdir + '/predicted.txt', sep='\t')
+    df.to_csv(outdir + SEP + 'predicted.txt', sep='\t')
     return auroc, aupr
