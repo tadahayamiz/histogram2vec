@@ -36,7 +36,7 @@ class MyDataset(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         input = self.input[idx]
         output = self.output[idx]
-        if self.transform:
+        if len(self.transform) > 0:
             for t in self.transform:
                 input = t(input)
         return input, output
