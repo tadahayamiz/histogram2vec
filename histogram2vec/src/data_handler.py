@@ -17,29 +17,29 @@ import torchvision.transforms as transforms
 # frozen
 class MyDataset(torch.utils.data.Dataset):
     """ to create my dataset """
-    def __init__(self, data=None, label=None, transform=None):
-        if data is None:
-            raise ValueError('!! Give data !!')
-        if label is None:
-            label = np.full(len(data), np.nan)
+    def __init__(self, input=None, output=None, transform=None):
+        if input is None:
+            raise ValueError('!! Give input !!')
+        if output is None:
+            raise ValueError('!! Give output !!')
         if type(transform) != list:
             self.transform = [transform]
         else:
             self.transform = transform
-        self.data = data
-        self.label = label
-        self.datanum = len(self.data)
+        self.input = input
+        self.output = output
+        self.datanum = len(self.input)
 
     def __len__(self):
         return self.datanum
 
-    def __getitem__(self,idx):
-        out_data = self.data[idx]
-        out_label = self.label[idx]
+    def __getitem__(self, idx):
+        input = self.input[idx]
+        output = self.output[idx]
         if self.transform:
             for t in self.transform:
-                out_data = t(out_data)
-        return out_data, out_label
+                input = t(input)
+        return input, output
 
 
 class MyTransforms:
@@ -51,7 +51,7 @@ class MyTransforms:
         return x
 
 
-def prep_dataset(data, label=None, transform=None) -> torch.utils.data.Dataset:
+def prep_dataset(input, output, transform=None) -> torch.utils.data.Dataset:
     """
     prepare dataset from row data
     
@@ -68,7 +68,7 @@ def prep_dataset(data, label=None, transform=None) -> torch.utils.data.Dataset:
         each function should return torch.tensor by __call__ method
     
     """
-    return MyDataset(data, label, transform)
+    return MyDataset(input, output, transform)
 
 
 def prep_dataloader(
@@ -116,7 +116,7 @@ def _worker_init_fn(worker_id):
 def prep_data(
     train_x, train_y, test_x, test_y, batch_size,
     transform=(None, None), shuffle=(True, False),
-    num_workers=None, pin_memory=None
+    num_workers=2, pin_memory=True
     ) -> Tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoader]:
     """
     prepare train and test loader from data

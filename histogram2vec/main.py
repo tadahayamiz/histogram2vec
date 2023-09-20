@@ -13,9 +13,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
+import torchvision.transforms as transforms
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm, trange
+import glob
 
 # original packages in src
 from .src import utils
@@ -28,8 +30,8 @@ DEVICE = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 class Hist2vec:
     def __init__(
-            self, workdir:str="", seed:int=222, num_step:int=100000,
-            batch_size:int=128, lr:float=1e-4):
+            self, workdir:str="", datafile:str="", seed:int=222,
+            num_step:int=100000, batch_size:int=128, lr:float=1e-4):
         self.workdir = workdir
         self.seed = 222
         self.num_step = num_step
@@ -38,6 +40,14 @@ class Hist2vec:
         utils.fix_seed(seed=seed, fix_gpu=False) # for seed control
         self._now = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
         self.dir_name = self.workdir + SEP + 'results' + SEP + self._now # for output
+        self.datafile = datafile
+        if not os.path.exists(self.datafile):
+            tmp = sorted(glob.glob(self.workdir + SEP + '*.npz'), reverse=True)[0]
+            if len(tmp) > 0:
+                self.datafile = tmp
+                print(f"load the following data: {tmp}")
+            else:
+                raise ValueError("!! Give data path !!")
         if not os.path.exists(self.dir_name):
             os.makedirs(self.dir_name)
         self.logger = utils.init_logger(
@@ -53,23 +63,20 @@ class Hist2vec:
         inference用を読み込む際のものも用意しておくと楽
         
         """
-        import torchvision.transforms as transforms
-        from torchvision.datasets import CIFAR10
-
         train_trans = transforms.Compose([
-            transforms.RandomAffine([0, 30], scale=(0.8, 1.2)),
-            transforms.RandomHorizontalFlip(p=0.5),
             transforms.ToTensor(),
-            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
         ])
         test_trans = transforms.Compose([
             transforms.ToTensor(),
-            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
         ])
-        train_set = CIFAR10(root='./data', train=True, download=True, transform=train_trans)
-        test_set = CIFAR10(root='./data', train=False, download=True, transform=test_trans)
-        train_loader = dh.prep_dataloader(train_set, args.batch_size)
-        test_loader = dh.prep_dataloader(test_set, args.batch_size)
+        dataset = np.load(self.datafile)
+        idx = int(dataset["input"].shape[0] * 0.9)
+        input = dataset["input"]
+        output = dataset["output"]
+        train_loader, test_loader = dh.prep_data(
+            input[:idx], output[:idx], input[idx:], output[idx:],
+            transform=(train_trans, test_trans)
+            )
         return train_loader, test_loader
 
 
@@ -147,7 +154,7 @@ class Hist2vec:
             test_loss.append(test_step_loss[0])
             test_rl.append(test_step_loss[1])
             test_kld.append(test_step_loss[2])
-            if step % 1000 == 0:
+            if step % 10000 == 0:
                 self.logger.info(
                     f'step: {step} // train_loss: {train_step_loss[0]:.4f} // valid_loss: {test_step_loss[0]:.4f}'
                     )
