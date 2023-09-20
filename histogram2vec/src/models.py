@@ -84,7 +84,7 @@ class Encoder(nn.Module):
 
 class Decoder(nn.Module):
     def __init__(self, color_channels, pooling_kernels):
-        super(DecoderBlock, self).__init__()
+        super(Decoder, self).__init__()
         self.b1 = DecoderBlock(256, 128, stride=1)
         self.b2 = DecoderBlock(128, 64, stride=pooling_kernels[1]) # corresponds to Encoder.b3
         self.b3 = DecoderBlock(64, 32, stride=pooling_kernels[0]) # corresponds to Encoder.b3
