@@ -112,21 +112,20 @@ class Data:
     data格納モジュール, 基本的にハード
         
     """
-    def __init__(self, url:str=None, df:pd.DataFrame=None):
+    def __init__(self, input):
         # 読み込み
         self.data = None
-        if url is None:
-            if df is None:
-                raise ValueError("!! Provide url or dataframe !!")
-            else:
-                self.data = df
+        if type(input) == str:
+            self.data = pd.read_csv(input, index_col=0)
+        elif type(input) == type(pd.DataFrame()):
+            self.data = input
         else:
-            self.data = pd.read_csv(url, index_col=0)
+            raise ValueError("!! Provide url or dataframe !!")            
         # データの中身の把握
         col = list(self.data.columns)
         self.dic_components = dict()
         for c in col:
-            tmp = df[c].values.flatten().tolist()
+            tmp = self.data[c].values.flatten().tolist()
             self.dic_components[c] = Counter(tmp)
 
 
@@ -190,7 +189,7 @@ class Data:
     def imshow(
             self, sid:str, bins:int=64, ratio:float=0.9,
             outdir:str="", v_name:str="FITC", s_name:str="SpecimenID",
-            figsize=None, fontsize:int=16
+            figsize=(), fontsize:int=16
             ):
         """ 指定したIDの画像を表示する """
         # data
