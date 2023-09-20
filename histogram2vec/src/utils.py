@@ -108,19 +108,21 @@ def summarize_model(model, input, outdir):
 
 
 # plot
-def plot_progress(train_loss, test_loss, num_epoch, outdir):
+def plot_progress(
+        train_loss, test_loss, num_epoch, outdir, xlabel="epoch", ylabel="loss"
+        ):
     """ plot learning progress """
     epochs = list(range(1, num_epoch + 1, 1))
     fig, ax = plt.subplots()
     plt.rcParams['font.size'] = 18
-    ax.plot(epochs, train_loss, c='purple', label='train loss')
-    ax.plot(epochs, test_loss, c='orange', label='test loss')
-    ax.set_xlabel('epoch')
-    ax.set_ylabel('loss')
+    ax.plot(epochs, train_loss, c='purple', label='train')
+    ax.plot(epochs, test_loss, c='orange', label='valid')
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
     ax.grid()
     ax.legend()
     plt.tight_layout()
-    plt.savefig(outdir + SEP + 'progress.tif', dpi=100, bbox_inches='tight')
+    plt.savefig(outdir + SEP + f'progress_{ylabel}.tif', dpi=100, bbox_inches='tight')
 
 
 def plot_accuracy(scores, labels, outdir):

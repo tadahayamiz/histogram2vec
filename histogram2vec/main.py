@@ -198,7 +198,6 @@ class Hist2vec:
             self.logger, name='optimizer', obj=optimizer, skip_keys={'state', 'param_groups'}
             )
         self.logger.info('elapsed_time: {:.2f} min'.format((time.time() - start)/60))
-        torch.save(model.state_dict(), self.dir_name + SEP + 'model_weight.pth')
 
 
     def load_model(self, url):
