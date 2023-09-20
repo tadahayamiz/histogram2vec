@@ -190,7 +190,15 @@ class Hist2vec:
         self.model, train_loss, test_loss = self.fit(
             model, train_loader, test_loader, criterion, optimizer
             )
-        utils.plot_progress(train_loss, test_loss, self.num_step, self.dir_name)
+        utils.plot_progress(
+            train_loss[0], test_loss[0], self.num_step, self.dir_name, xlabel="step", ylabel="loss"
+            )
+        utils.plot_progress(
+            train_loss[1], test_loss[1], self.num_step, self.dir_name, xlabel="step", ylabel="RL"
+            )
+        utils.plot_progress(
+            train_loss[2], test_loss[2], self.num_step, self.dir_name, xlabel="step", ylabel="KLD"
+            )
         utils.summarize_model(model, next(iter(train_loader))[0], self.dir_name)
         # 4. save results & config
         utils.to_logger(self.logger, name='loss', obj=criterion)
