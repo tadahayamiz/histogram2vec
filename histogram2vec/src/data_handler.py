@@ -38,6 +38,9 @@ class MyDataset(torch.utils.data.Dataset):
         output = self.output[idx]
         if len(self.transform) > 0:
             for t in self.transform:
+
+                print("HELLO")
+                
                 input = t(input)
         return input, output
 
