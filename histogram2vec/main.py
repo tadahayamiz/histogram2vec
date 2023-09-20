@@ -41,6 +41,7 @@ class Hist2vec:
         self.lr = lr
         self.n_monitor = n_monitor
         utils.fix_seed(seed=seed, fix_gpu=False) # for seed control
+        self._now = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
         self.dir_name = self.workdir + SEP + 'results' + SEP + self._now # for output
         self.datafile = datafile
         if not os.path.exists(self.datafile):
@@ -52,7 +53,6 @@ class Hist2vec:
                 raise ValueError("!! Give data path !!")
         if not os.path.exists(self.dir_name):
             os.makedirs(self.dir_name)
-        self._now = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
         self.logger = utils.init_logger(
             __name__, self.dir_name, self._now, level_console='debug'
             )
