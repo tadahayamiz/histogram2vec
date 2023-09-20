@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 import os
 import matplotlib.pyplot as plt
+import cv2
 from collections import Counter
 from itertools import chain
 from tqdm.auto import tqdm, trange
@@ -243,12 +244,15 @@ class DataMaker:
             # imageのbinarize化と格納
             array0[i, :, :] = self.binarize(img0)
             array1[i, :, :] = self.binarize(img1)
+        # NHWC形式になるように次元を追加
+        array0 = array0[..., np.newaxis]
+        array1 = array1[..., np.newaxis]
         # npzで保存
         if test_view:
             print("input example")
-            self.imshow(array0[0])
+            self.imshow(array0[0, :, :, 0])
             print("output example")
-            self.imshow(array1[0])
+            self.imshow(array1[0, :, :, 0])
         now = datetime.datetime.now().strftime('%Y%m%d')
         fileout = outdir + SEP + f"dataset_{now}.npz"
         np.savez_compressed(fileout, input=array0, output=array1)
@@ -285,12 +289,19 @@ class DataMaker:
         return img
 
 
+    # def binarize(self, data):
+    #     """ 得られたarrayを二値化する """
+    #     data = (data == 0).sum(axis=2) # h, w, cであり, blackなので255, 0のみとなっている
+    #     data = (data > 0).astype(np.uint8)
+    #     return data
+
+
     def binarize(self, data):
         """ 得られたarrayを二値化する """
-        data = (data == 0).sum(axis=2) # h, w, cであり, blackなので255, 0のみとなっている
-        data = (data > 0).astype(np.uint8)
+        data = data.sum(axis=2) # h, w, cであり, blackなので255, 0のみとなっている
+        data = np.where(data > 0, 255, 0)
         return data
-    
+
 
     def imshow(self, data, cmap='binary', figsize=None):
         """ show pixelized data """
