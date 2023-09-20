@@ -31,12 +31,12 @@ DEVICE = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 class Hist2vec:
     def __init__(
             self, workdir:str="", datafile:str="", seed:int=222,
-            num_step:int=100000, batch_size:int=128, lr:float=1e-3,
+            num_epoch:int=100, batch_size:int=128, lr:float=1e-4,
             n_monitor:int=1000, encoder_output_size=16, dim_latent=64
             ):
         self.workdir = workdir
         self.seed = 222
-        self.num_step = num_step
+        self.num_epoch = num_epoch
         self.batch_size = batch_size
         self.lr = lr
         self.enc_out = encoder_output_size
@@ -105,10 +105,13 @@ class Hist2vec:
         model.to(DEVICE)
         criterion = loss_function
         optimizer = optim.Adam(model.parameters(), lr=self.lr)
-        return model, criterion, optimizer
+        scheduler = optim.lr_scheduler.CosineAnnealingLR(
+            optimizer, T_max=self.num_epoch, eta_min=0
+            )
+        return model, criterion, optimizer, scheduler
 
 
-    def train_step(self, model, train_loader, test_loader, criterion, optimizer):
+    def train_epoch(self, model, train_loader, test_loader, criterion, optimizer):
         """
         epoch単位の学習構成, なくとも良い
         
@@ -148,7 +151,7 @@ class Hist2vec:
         return model, train_loss, test_loss
 
 
-    def fit(self, model, train_loader, test_loader, criterion, optimizer):
+    def fit(self, model, train_loader, test_loader, criterion, optimizer, scheduler):
         """
         学習
         model, train_loss, test_loss (valid_loss)を返す
@@ -160,20 +163,22 @@ class Hist2vec:
         test_loss = []
         test_rl = []
         test_kld = []
-        for step in trange(self.num_step):
-            model, train_step_loss, test_step_loss = self.train_step(
+        for epoch in range(self.num_epoch):
+            model, train_epoch_loss, test_epoch_loss = self.train_epoch(
                 model, train_loader, test_loader, criterion, optimizer
                 )
-            train_loss.append(train_step_loss[0])
-            train_rl.append(train_step_loss[1])
-            train_kld.append(train_step_loss[2])
-            test_loss.append(test_step_loss[0])
-            test_rl.append(test_step_loss[1])
-            test_kld.append(test_step_loss[2])
-            if step % self.n_monitor == 0:
+            scheduler.step() # should be removed if not necessary
+            train_loss.append(train_epoch_loss[0])
+            train_rl.append(train_epoch_loss[1])
+            train_kld.append(train_epoch_loss[2])
+            test_loss.append(test_epoch_loss[0])
+            test_rl.append(test_epoch_loss[1])
+            test_kld.append(test_epoch_loss[2])
+            if epoch % self.n_monitor == 0:
                 self.logger.info(
-                    f'step: {step} // train_loss: {train_step_loss[0]:.4f} // valid_loss: {test_step_loss[0]:.4f}'
+                    f'epoch: {epoch} // train_loss: {train_epoch_loss[0]:.4f} // valid_loss: {test_epoch_loss[0]:.4f}'
                     )
+            steps += len(train_loader)
         return model, (train_loss, train_rl, train_kld), (test_loss, test_rl, test_kld)
 
 
@@ -185,19 +190,19 @@ class Hist2vec:
             f'num_training_data: {len(train_loader)}, num_test_data: {len(test_loader)}'
             )
         # 2. model prep
-        model, criterion, optimizer = self.prepare_model()
+        model, criterion, optimizer, scheduler = self.prepare_model()
         # 3. training
         self.model, train_loss, test_loss = self.fit(
-            model, train_loader, test_loader, criterion, optimizer
+            model, train_loader, test_loader, criterion, optimizer, scheduler
             )
         utils.plot_progress(
-            train_loss[0], test_loss[0], self.num_step, self.dir_name, xlabel="step", ylabel="loss"
+            train_loss[0], test_loss[0], self.num_step, self.dir_name, xlabel="epoch", ylabel="loss"
             )
         utils.plot_progress(
-            train_loss[1], test_loss[1], self.num_step, self.dir_name, xlabel="step", ylabel="RL"
+            train_loss[1], test_loss[1], self.num_step, self.dir_name, xlabel="epoch", ylabel="RL"
             )
         utils.plot_progress(
-            train_loss[2], test_loss[2], self.num_step, self.dir_name, xlabel="step", ylabel="KLD"
+            train_loss[2], test_loss[2], self.num_step, self.dir_name, xlabel="epoch", ylabel="KLD"
             )
         utils.summarize_model(model, next(iter(train_loader))[0], self.dir_name)
         # 4. save results & config
