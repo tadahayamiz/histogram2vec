@@ -61,9 +61,9 @@ class Encoder(nn.Module):
         self.b1 = EncoderBlock(color_channles, 32, kernel=1, stride=1, padding=0)
         ## 基本バイナリ画像のためin_channels=1
         self.b2 = EncoderBlock(32, 64, kernel=3, stride=1, padding=0)
-        self.b3 = EncoderBlock(64, 128, kernel=3, stride=pooling_kernels[0], padding=0)
+        self.b3 = EncoderBlock(64, 128, kernel=3, stride=pooling_kernels[0], padding=1)
         ## kernel検討の余地あり, 2
-        self.b4 = EncoderBlock(128, 256, kernel=3, stride=pooling_kernels[1], padding=0)
+        self.b4 = EncoderBlock(128, 256, kernel=3, stride=pooling_kernels[1], padding=1)
         ## kernel検討の余地あり, 2
 
 
