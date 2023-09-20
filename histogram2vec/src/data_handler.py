@@ -22,12 +22,19 @@ class MyDataset(torch.utils.data.Dataset):
             raise ValueError('!! Give input !!')
         if output is None:
             raise ValueError('!! Give output !!')
-        if type(transform) != list:
-            self.transform = [transform]
-        elif transform is None:
-            self.transform = []
+        if type(transform) == list:
+            if len(transform) != 0:
+                if transform[0] is None:
+                    self.transform = []
+                else:
+                    self.transform = transform
+            else:
+                self.transform = transform
         else:
-            self.transform = transform
+            if transform is None:
+                self.transform = []
+            else:
+                self.transform = [transform]
         self.input = input
         self.output = output
         self.datanum = len(self.input)
