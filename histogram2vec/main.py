@@ -216,7 +216,7 @@ class Hist2vec:
 
 
     def load_model(self, url):
-        self.model, _, _ = self.prepare_model()
+        self.model, _, _, _ = self.prepare_model()
         self.model.load_state_dict(torch.load(url))
 
 
