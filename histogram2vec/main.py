@@ -75,9 +75,13 @@ class Hist2vec:
         #     transforms.ToTensor(),
         # ])
         dataset = np.load(self.datafile)
-        idx = int(dataset["input"].shape[0] * 0.9)
-        input = torch.tensor(dataset["input"]).float()
-        output = torch.tensor(dataset["output"]).float()
+        input = dataset["input"]
+        output = dataset["output"]
+        idx = int(input.shape[0] * 0.9)
+        input = np.transpose(input, [0,3,1,2]) # nhwc -> nchw
+        output = np.transpose(output, [0,3,1,2]) # nhwc -> nchw
+        input = torch.tensor(input).float()
+        output = torch.tensor(output).float()
         train_loader, test_loader = dh.prep_data(
             input[:idx], output[:idx], input[idx:], output[idx:],
             batch_size=self.batch_size, transform=(None, None)
