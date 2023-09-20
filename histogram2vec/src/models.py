@@ -50,7 +50,7 @@ class DecoderBlock(nn.Module):
         )
         self.bn = nn.BatchNorm2d(out_channels)
         if activation == "relu":
-            self.a = nn.ReLu(inplace=True)
+            self.a = nn.ReLU(inplace=True)
         elif activation == "sigmoid":
             self.a = nn.Sigmoid() # ここはinplaceないか
         else:
