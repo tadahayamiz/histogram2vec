@@ -68,20 +68,24 @@ class Hist2vec:
         inference用を読み込む際のものも用意しておくと楽
         
         """
-        train_trans = transforms.Compose([
-            transforms.ToTensor(),
-        ])
-        test_trans = transforms.Compose([
-            transforms.ToTensor(),
-        ])
+        # train_trans = transforms.Compose([
+        #     transforms.ToTensor(),
+        # ])
+        # test_trans = transforms.Compose([
+        #     transforms.ToTensor(),
+        # ])
         dataset = np.load(self.datafile)
         idx = int(dataset["input"].shape[0] * 0.9)
-        input = dataset["input"]
-        output = dataset["output"]
+        input = torch.tensor(dataset["input"])
+        output = torch.tensor(dataset["output"])
         train_loader, test_loader = dh.prep_data(
             input[:idx], output[:idx], input[idx:], output[idx:],
-            batch_size=self.batch_size, transform=(train_trans, test_trans)
+            batch_size=self.batch_size
             )
+        # train_loader, test_loader = dh.prep_data(
+        #     input[:idx], output[:idx], input[idx:], output[idx:],
+        #     batch_size=self.batch_size, transform=(train_trans, test_trans)
+        #     )
         return train_loader, test_loader
 
 

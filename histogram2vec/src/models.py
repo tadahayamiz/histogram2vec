@@ -9,16 +9,8 @@ https://gist.github.com/koshian2/64e92842bec58749826637e3860f11fa
 """
 import torch
 import torch.nn as nn
-import torch.optim as optim
 import torch.nn.functional as F
-import torchvision
-import torchvision.transforms as transforms
-from torchvision.utils import save_image
-from torchvision.datasets import MNIST, FashionMNIST, CIFAR10, STL10
-import os
-import pickle
-import zipfile
-import datetime
+
 
 class EncoderBlock(nn.Module):
     def __init__(
