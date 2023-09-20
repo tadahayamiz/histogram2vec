@@ -50,7 +50,7 @@ class DecoderBlock(nn.Module):
 
 
     def forward(self, x):
-        h = self.conv2d(x)
+        h = self.convt(x)
         return self.a(self.bn(h))
 
 
