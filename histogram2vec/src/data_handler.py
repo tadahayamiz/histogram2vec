@@ -24,6 +24,8 @@ class MyDataset(torch.utils.data.Dataset):
             raise ValueError('!! Give output !!')
         if type(transform) != list:
             self.transform = [transform]
+        elif transform is None:
+            self.transform = []
         else:
             self.transform = transform
         self.input = input
@@ -36,11 +38,6 @@ class MyDataset(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         input = self.input[idx]
         output = self.output[idx]
-
-
-        print(self.transform, type(self.transform))
-
-
         if len(self.transform) > 0:
             for t in self.transform:
                 input = t(input)
