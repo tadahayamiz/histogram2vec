@@ -119,6 +119,11 @@ class Hist2vec:
         train_batch_kld = []
         for data_in, data_out in train_loader:
             data_in, data_out = data_in.to(DEVICE), data_out.to(DEVICE) # put data on GPU
+
+
+            print(data_in.shape)
+            
+
             optimizer.zero_grad() # reset gradients
             output, mu, logvar = model(data_in) # forward
             loss, rl, kld = criterion(output, data_out, mu, logvar) # calculate loss
