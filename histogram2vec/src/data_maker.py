@@ -187,13 +187,18 @@ class Data:
     
 
     def imshow(
-            self, sid:str, bins:int=64, ratio:float=0.9,
+            self, sid:str, bins:int=64, ratio:float=0.9, condition:dict=dict(),
             outdir:str="", v_name:str="FITC", s_name:str="SpecimenID",
             figsize=(), fontsize:int=16
             ):
         """ 指定したIDの画像を表示する """
         # data
+        if len(condition) > 0:
+            self.conditioned(condition)
         data = self.sample(sid, 2, ratio, v_name, s_name)[0]
+
+        print(data)
+
         # show
         if len(figsize) > 0:
             fig = plt.figure(figsize=figsize)
