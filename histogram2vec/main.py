@@ -31,14 +31,16 @@ DEVICE = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 class Hist2vec:
     def __init__(
             self, workdir:str="", datafile:str="", seed:int=222,
-            num_step:int=100000, batch_size:int=128, lr:float=1e-4):
+            num_step:int=100000, batch_size:int=128, lr:float=1e-4,
+            n_monitor:int=1000
+            ):
         self.workdir = workdir
         self.seed = 222
         self.num_step = num_step
         self.batch_size = batch_size
         self.lr = lr
+        self.n_monitor = n_monitor
         utils.fix_seed(seed=seed, fix_gpu=False) # for seed control
-        self._now = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
         self.dir_name = self.workdir + SEP + 'results' + SEP + self._now # for output
         self.datafile = datafile
         if not os.path.exists(self.datafile):
@@ -50,6 +52,7 @@ class Hist2vec:
                 raise ValueError("!! Give data path !!")
         if not os.path.exists(self.dir_name):
             os.makedirs(self.dir_name)
+        self._now = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
         self.logger = utils.init_logger(
             __name__, self.dir_name, self._now, level_console='debug'
             )
@@ -75,7 +78,7 @@ class Hist2vec:
         output = dataset["output"]
         train_loader, test_loader = dh.prep_data(
             input[:idx], output[:idx], input[idx:], output[idx:],
-            transform=(train_trans, test_trans)
+            batch_size=self.batch_size, transform=(train_trans, test_trans)
             )
         return train_loader, test_loader
 
@@ -154,7 +157,7 @@ class Hist2vec:
             test_loss.append(test_step_loss[0])
             test_rl.append(test_step_loss[1])
             test_kld.append(test_step_loss[2])
-            if step % 10000 == 0:
+            if step % self.n_monitor == 0:
                 self.logger.info(
                     f'step: {step} // train_loss: {train_step_loss[0]:.4f} // valid_loss: {test_step_loss[0]:.4f}'
                     )
