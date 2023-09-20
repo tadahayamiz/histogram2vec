@@ -193,10 +193,7 @@ class Data:
             ):
         """ 指定したIDの画像を表示する """
         # data
-        data = self.sample(sid, 1, ratio, v_name, s_name)
-
-        print(data)
-
+        data = self.sample(sid, 2, ratio, v_name, s_name)[0]
         # show
         if len(figsize) > 0:
             fig = plt.figure(figsize=figsize)
