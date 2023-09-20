@@ -140,7 +140,7 @@ class Data:
 
 
     def sample(
-        self, sid:int, n_sample:int=256, ratio:float=0.9,
+        self, sid:str, n_sample:int=256, ratio:float=0.9,
         v_name:str="FITC", s_name:str="SpecimenID"
         ):
         """
@@ -185,6 +185,29 @@ class Data:
             res = [res[i] for i in idx]
             specimen = [specimen[i] for i in idx]
         return res, specimen
+    
+
+    def imshow(
+            self, sid:str, bins:int=64, ratio:float=0.9,
+            outdir:str="", v_name:str="FITC", s_name:str="SpecimenID",
+            figsize=None, fontsize:int=16
+            ):
+        """ 指定したIDの画像を表示する """
+        # data
+        data = self.sample(sid, 1, ratio, v_name, s_name)
+        # show
+        if len(figsize) > 0:
+            fig = plt.figure(figsize=figsize)
+        else:
+            fig = plt.figure()
+        plt.rcParams["font.size"] = fontsize
+        ax = fig.add_subplot(1, 1, 1)
+        plt.gca().spines["top"].set_visible(False)
+        plt.gca().spines["right"].set_visible(False)
+        ax.hist(data, color="black", bins=bins)
+        if len(outdir) > 0:
+            plt.savefig(outdir + SEP + f"hist_{sid}.png")
+        plt.show()
 
 
 class DataMaker:
@@ -222,7 +245,7 @@ class DataMaker:
 
 
     def main(
-            self, outdir:str="", ratio:float=0.9,
+            self, outdir:str="", name:str="", ratio:float=0.9,
             bins:tuple=(), test_view:bool=True, limit:tuple=()
             ):
         """
@@ -266,7 +289,10 @@ class DataMaker:
             print("output example")
             self.imshow(array1[0, :, :, 0])
         now = datetime.datetime.now().strftime('%Y%m%d')
-        fileout = outdir + SEP + f"dataset_{now}.npz"
+        if len(name) > 0:
+            fileout = outdir + SEP + f"dataset_{name}_{now}.npz"
+        else:
+            fileout = outdir + SEP + f"dataset_{now}.npz"
         np.savez_compressed(
             fileout, input=array0, output=array1, specimen=self.specimen
             )
@@ -317,7 +343,7 @@ class DataMaker:
         return data
 
 
-    def imshow(self, data, cmap='binary', figsize=None):
+    def imshow(self, data, cmap='binary_r', figsize=None):
         """ show pixelized data """
         plt.figure(figsize=figsize)
         plt.tick_params(
