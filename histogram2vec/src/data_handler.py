@@ -38,7 +38,7 @@ class MyDataset(torch.utils.data.Dataset):
         output = self.output[idx]
 
 
-        print(self.transform, self.transform.type)
+        print(self.transform, type(self.transform))
 
 
         if len(self.transform) > 0:
