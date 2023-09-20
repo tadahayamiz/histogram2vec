@@ -32,13 +32,15 @@ class Hist2vec:
     def __init__(
             self, workdir:str="", datafile:str="", seed:int=222,
             num_step:int=100000, batch_size:int=128, lr:float=1e-4,
-            n_monitor:int=1000
+            n_monitor:int=1000, encoder_output_size=16, dim_latent=64
             ):
         self.workdir = workdir
         self.seed = 222
         self.num_step = num_step
         self.batch_size = batch_size
         self.lr = lr
+        self.enc_out = encoder_output_size
+        self.dim_latent = dim_latent
         self.n_monitor = n_monitor
         utils.fix_seed(seed=seed, fix_gpu=False) # for seed control
         self._now = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
@@ -88,7 +90,10 @@ class Hist2vec:
         model, loss, optimizer, schedulerの準備
 
         """
-        model = VAE()
+        model = VAE(
+            color_channels=1, pooling_kernels=(2, 2),
+            encoder_output_size=self.enc_out, dim_latent=self.dim_latent
+            )
         model.to(DEVICE)
         criterion = loss_function
         optimizer = optim.Adam(model.parameters(), lr=self.lr)
