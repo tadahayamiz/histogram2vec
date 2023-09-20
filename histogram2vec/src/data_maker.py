@@ -169,12 +169,15 @@ class Data:
         print(f"> handling {len(specimens)} specimens")
         n_sample = samplesize // len(specimens) # n_sampleを決める
         res = []
+        label = []
         for s in tqdm(specimens):
             tmp = self.sample(s, n_sample, ratio, v_name, s_name)
             tmp = [v[0] for v in np.split(tmp, n_sample, axis=0)]
             ## 1個中に入るため
             res.append(tmp)
+            label.append([s] * n_sample)
         res = list(chain.from_iterable(res))
+        label = list(chain.from_iterable(label))
         if shuffle:
             rng = np.random.default_rng()
             rng.shuffle(res)

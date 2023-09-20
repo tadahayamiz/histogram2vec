@@ -34,7 +34,7 @@ def fix_seed(seed:int=None,fix_gpu:bool=False):
 # logger
 def init_logger(
     module_name:str, outdir:str='', tag:str='',
-    level_console:str='warning', level_file:str='info'
+    level_console:str='info', level_file:str='info'
     ):
     """
     initialize logger

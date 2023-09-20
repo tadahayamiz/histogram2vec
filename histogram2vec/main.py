@@ -195,13 +195,13 @@ class Hist2vec:
             model, train_loader, test_loader, criterion, optimizer, scheduler
             )
         utils.plot_progress(
-            train_loss[0], test_loss[0], self.num_step, self.dir_name, xlabel="epoch", ylabel="loss"
+            train_loss[0], test_loss[0], self.num_epoch, self.dir_name, xlabel="epoch", ylabel="loss"
             )
         utils.plot_progress(
-            train_loss[1], test_loss[1], self.num_step, self.dir_name, xlabel="epoch", ylabel="RL"
+            train_loss[1], test_loss[1], self.num_epoch, self.dir_name, xlabel="epoch", ylabel="RL"
             )
         utils.plot_progress(
-            train_loss[2], test_loss[2], self.num_step, self.dir_name, xlabel="epoch", ylabel="KLD"
+            train_loss[2], test_loss[2], self.num_epoch, self.dir_name, xlabel="epoch", ylabel="KLD"
             )
         utils.summarize_model(model, next(iter(train_loader))[0], self.dir_name)
         # 4. save results & config
