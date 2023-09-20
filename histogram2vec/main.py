@@ -76,7 +76,16 @@ class Hist2vec:
         # ])
         dataset = np.load(self.datafile)
         idx = int(dataset["input"].shape[0] * 0.9)
+
+        print(idx)
+        print(dataset["input"].shape)
+        print(dataset["input"][:5])
+
         input = torch.tensor(dataset["input"])
+
+        print(input.shape)
+        print(input[:5])
+
         output = torch.tensor(dataset["output"])
         train_loader, test_loader = dh.prep_data(
             input[:idx], output[:idx], input[idx:], output[idx:],
