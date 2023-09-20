@@ -31,7 +31,7 @@ DEVICE = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 class Hist2vec:
     def __init__(
             self, workdir:str="", datafile:str="", seed:int=222,
-            num_step:int=100000, batch_size:int=128, lr:float=1e-4,
+            num_step:int=100000, batch_size:int=128, lr:float=1e-3,
             n_monitor:int=1000, encoder_output_size=16, dim_latent=64
             ):
         self.workdir = workdir
@@ -214,9 +214,22 @@ class Hist2vec:
 
 
     def encode(self, x):
+        # load
         if self.model is None:
             raise ValueError("!! No trained model !!")
+        input = np.transpose(x, [0,3,1,2])
+        input = torch.tensor(input).float()
+        # prep dataloader
+        dataset = dh.prep_dataset(input, input, None)
+        dataloader = dh.prep_dataloader(dataset, self.batch_size, shuffle=False)
+        self.model.eval() # test (validation)
+        mus = []
         with torch.no_grad():
-            return self.model.encode(x)
-        
-    
+            for data_in, data_out in dataloader:
+                data_in, data_out = data_in.to(DEVICE), data_out.to(DEVICE)
+                output, mu, logvar = self.model(data_in)
+                mus.append(mu)
+        mus = torch.cat(mus, axis=0)
+        if torch.cuda.is_available():
+            mus = mus.cpu().detach().numpy()
+        return mus
