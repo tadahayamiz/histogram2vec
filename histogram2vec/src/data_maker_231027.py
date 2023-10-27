@@ -140,7 +140,7 @@ class Data:
 
     def sample(
         self, sid:int, n_sample:int=256, ratio:float=0.9,
-        v_name:str="value", s_name:str="sample_id"
+        v_name:str="FITC", s_name:str="SpecimenID"
         ):
         """
         指定した検体からn_sampleの回の輝点のサンプリングを行う
@@ -149,10 +149,6 @@ class Data:
         ----------
         sid: int
             Specimen ID, 検体をidentifyする
-
-        v_name: str
-            valueカラムの名称
-            DPPVIの場合は素直にvalue
 
         """
         tmp = self.data[self.data[s_name]==sid]
@@ -165,7 +161,7 @@ class Data:
 
     def prep_data(
             self, samplesize:int=10000, ratio:float=0.9,
-            shuffle:bool=True, v_name:str="value", s_name:str="sample_id"
+            shuffle:bool=True, v_name:str="FITC", s_name:str="SpecimenID"
             ):
         """ 指定したsamplesizeまでサンプリングを行う """
         specimens = set(list(self.data[s_name]))
@@ -192,7 +188,7 @@ class Data:
 
     def imshow(
             self, sid:int, bins:int=64, ratio:float=0.9, condition:dict=dict(),
-            outdir:str="", v_name:str="value", s_name:str="sample_id",
+            outdir:str="", v_name:str="FITC", s_name:str="SpecimenID",
             figsize=(), fontsize:int=16
             ):
         """ 指定したIDの画像を表示する """
